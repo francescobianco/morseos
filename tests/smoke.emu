@@ -1,0 +1,106 @@
+# Walks through MorseOS on the virtual clock.
+#   wait MS | press MS | down | up | type TESTO | speed N | notify TESTO | find
+#   connect NOME DBM | disconnect | battery MV 0|1 | time AAAA-MM-GG HH:MM:SS
+#   shot FILE.png | expect TESTO-NEL-LOG | expect-screen on|off | quit
+time 2026-11-07 21:45:50
+battery 3650 0
+wait 200
+expect-screen on
+shot build/shots/01-quadrante.png
+
+# the minute changes on its own
+wait 11000
+shot build/shots/02-quadrante-21-46.png
+
+# link: bars after 1 s, the name after 2 s
+connect Pixel -72
+wait 2500
+shot build/shots/03-bluetooth.png
+
+# access word
+type TAN
+expect L T -
+expect L A .-
+expect L N -.
+expect W TAN
+expect buzz 60
+wait 300
+shot build/shots/04-menu.png
+
+# a hold fills the gauge and opens the selected box: INFO
+down
+wait 550
+shot build/shots/05-barra-conferma.png
+wait 300
+up
+expect buzz 40
+wait 100
+shot build/shots/06-info.png
+press 100
+
+# tap to STRUMENTI, hold to enter, hold to open PRATICA
+press 100
+wait 100
+press 900
+wait 100
+press 900
+wait 100
+shot build/shots/07-pratica.png
+
+# 3 s hold leaves
+press 3200
+expect buzz 60
+wait 100
+shot build/shots/08-strumenti.png
+
+# tap to SENSORI, open it
+press 100
+wait 100
+press 900
+wait 400
+shot build/shots/09-sensori.png
+press 3200
+wait 100
+
+# a notification goes over everything
+notify CIAO DA MORSEOS
+wait 400
+expect buzz 150
+shot build/shots/10-messaggio.png
+press 100
+wait 100
+
+# battery and charging on the face
+battery 3400 1
+wait 100
+shot build/shots/11-carica.png
+
+# idle: the screen goes off after 15 s, the next touch only wakes it
+wait 16000
+expect-screen off
+press 100
+wait 50
+expect-screen on
+
+# emergency: 10 s held, release, 3 taps
+down
+wait 10100
+expect buzz 400
+shot build/shots/12-emergenza.png
+up
+wait 200
+press 100
+wait 200
+press 100
+wait 200
+press 100
+wait 1000
+expect AGGIORNATORE
+
+# fast speed: the keyer must stay out of the erase burst
+speed 16
+wait 10
+type H5
+expect L H ....
+expect L 5 .....
+quit
