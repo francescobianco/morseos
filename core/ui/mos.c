@@ -11,8 +11,12 @@
 #define LONG_MS         600   /* apps with MOS_F_LONG */
 #define MENU_SHORT_MS   300   /* menu: a tap shorter than this moves to the next box */
 #define MENU_CONFIRM_MS 800   /* menu: holding this long fills the gauge and opens the box */
+#define BOX_H           46    /* menu: three boxes, the middle one has the focus */
+#define BOX_Y_PREV      3
+#define BOX_Y_FOCUS     52
+#define BOX_Y_NEXT      101
 #define GAUGE_X         7     /* gauge along the bottom edge inside the selected box */
-#define GAUGE_Y         (8 + 66 - 7)
+#define GAUGE_Y         (BOX_Y_FOCUS + BOX_H - 7)
 #define GAUGE_W         66
 #define GAUGE_H         4
 #define HOLD_EXIT_MS    3000
@@ -35,7 +39,7 @@ static int in_menu;                 /* the menu is shown instead of the active a
 static const char *menu_name = "MENU";
 static const char *app_menu = "MENU";  /* menu the active app was opened from */
 static item_t items[MAX_ITEMS];
-static int n_items, menu_top;
+static int n_items, menu_focus;
 static int screen_on = 1, pressed, consumed, long_fired, connected, rssi_dbm = -127;
 static char peer[4];
 static u32 t_press, t_activity;
@@ -166,7 +170,7 @@ static void draw_back_arrow(int cx, int cy, u16 c) {
 static void draw_box(int y, const item_t *it, int selected) {
     const char *label = it->label;
     u16 c = selected ? C_WHITE : C_GREY;
-    int x = 4, w = 72, h = 66, t = selected ? 2 : 1, sc;
+    int x = 4, w = 72, h = BOX_H, t = selected ? 2 : 1, sc;
     lcd_fill(x, y, w, h, C_BLACK);
     lcd_fill(x, y, w, t, c);
     lcd_fill(x, y + h - t, w, t, c);
@@ -191,13 +195,15 @@ static void draw_gauge(int fill) {
 static void draw_menu(void) {
     gauge_fill = 0;
     lcd_fill(0, 0, lcd.width, lcd.height, C_BLACK);
-    draw_box(8, &items[menu_top], 1);
-    if (n_items > 1) draw_box(80, &items[(menu_top + 1) % n_items], 0);
+    /* a ring: previous above, next below; with two items the other one only shows below */
+    if (n_items > 2) draw_box(BOX_Y_PREV, &items[(menu_focus + n_items - 1) % n_items], 0);
+    draw_box(BOX_Y_FOCUS, &items[menu_focus], 1);
+    if (n_items > 1) draw_box(BOX_Y_NEXT, &items[(menu_focus + 1) % n_items], 0);
     touch_mark(pressed);
 }
 
 static void menu_select(void) {
-    item_t *it = &items[menu_top];
+    item_t *it = &items[menu_focus];
     if (it->home) mos_home();
     else if (it->submenu) mos_menu(it->submenu);
     else if (it->app) {
@@ -233,7 +239,7 @@ void mos_menu(const char *name) {
     morse_reset();
     menu_name = name;
     build_menu(name);
-    menu_top = 0;
+    menu_focus = 0;
     in_menu = 1;
     mos_redraw();
 }
@@ -345,7 +351,7 @@ void mos_poll(int touched) {
         } else if (!consumed) {
             if (in_menu) {
                 if (mos_ms_since(t_press) < MENU_SHORT_MS && n_items) {
-                    menu_top = (menu_top + 1) % n_items;  /* tap: next box */
+                    menu_focus = (menu_focus + 1) % n_items;  /* tap: next box */
                     draw_menu();
                 } else {
                     draw_gauge(0);                        /* let go too early: reset */

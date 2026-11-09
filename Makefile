@@ -4,6 +4,8 @@ BUILD  := build
 GEN    := _gen
 BIN    := $(BUILD)/morseos-emu
 
+.DEFAULT_GOAL := $(BIN)
+
 MODULE_INIS := $(wildcard core/*/module.ini lib/*/module.ini apps/*/module.ini)
 
 include $(GEN)/bundle.mk

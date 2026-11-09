@@ -26,7 +26,7 @@ stesso `tools/bundle.py`.
 
 | Percorso | Origine |
 |---|---|
-| `apps/`, `core/ui/`, `lib/font`, `lib/morse`, `lib/rtc`, gli header di `lib/` | identici al firmware |
+| `apps/`, `core/ui/`, `lib/font`, `lib/morse`, `lib/rtc`, gli header di `lib/` | dal firmware; qui si anticipano le modifiche (`core/ui/mos.c` ha già il menu a tre riquadri) |
 | `lib/display`, `lib/battery`, `lib/i2cprobe` (`*_emu.c`), `lib/fitpro` | sostituti dell'hardware |
 | `core/system/system_emu.c` | il ciclo principale di `main.c`, senza radio |
 | `emulator/` | orologio, finestra GTK, script, finti header dell'SDK Telink |
